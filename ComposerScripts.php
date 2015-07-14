@@ -27,14 +27,14 @@ class ComposerScripts
         $yii2extensionFile = $filesystem->normalizePath(realpath($config->get('vendor-dir').'/yiisoft/extensions.php'));
         
         if($psr4config && $psr4File){
-            echo 'generating local autoload_psr4.php ....\\n';
+            echo "generating local autoload_psr4.php ....\n";
             self::appendBeforeLastline($psr4config,$psr4File);
-            echo 'local autoload_psr4 generated.\\n';
+            echo "local autoload_psr4 generated.\n";
         }
         if($yii2conifg && $yii2extensionFile){
-            echo 'generating local yii2 extensions.php....\\n';
+            echo "generating local yii2 extensions.php....\n";
             self::appendBeforeLastline($yii2conifg,$yii2extensionFile);
-            echo 'local yii2 extensions.php.\\n';
+            echo "local yii2 extensions.php.\n";
         }
     }
     /**
