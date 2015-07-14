@@ -12,6 +12,7 @@ class ComposerScripts
     public static function postAutoloadDump(Event $event)
     {
         $composer = $event->getComposer();
+        $io = $event->getIO();
         $filesystem = new FileSystem();
         $config = $composer->getConfig();
         $package = $composer->getPackage();
@@ -27,14 +28,14 @@ class ComposerScripts
         $yii2extensionFile = $filesystem->normalizePath(realpath($config->get('vendor-dir').'/yiisoft/extensions.php'));
         
         if($psr4config && $psr4File){
-            echo "generating local autoload_psr4.php ....\n";
+            $io->write('generating local autoload_psr4.php ....');
             self::appendBeforeLastline($psr4config,$psr4File);
-            echo "local autoload_psr4 generated.\n";
+            $io->write('local autoload_psr4 generated.');
         }
         if($yii2conifg && $yii2extensionFile){
-            echo "generating local yii2 extensions.php....\n";
+            $io->write('generating local yii2 extensions.php....');
             self::appendBeforeLastline($yii2conifg,$yii2extensionFile);
-            echo "local yii2 extensions.php.\n";
+            $io->write('local yii2 extensions.php.');
         }
     }
     /**
