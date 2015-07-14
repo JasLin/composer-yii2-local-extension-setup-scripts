@@ -17,7 +17,7 @@ class ComposerScripts
         $package = $composer->getPackage();
         $extra = $package->getExtra();
         $psr4config = $extra['local-psr-4'];
-        $yii2LocalExtensions = $extra['yii2-local-extensions'];
+        $yii2LocalExtensions = $extra['local-yii2-extensions'];
         
         $yii2conifg = '';
         foreach($yii2LocalExtensions as $extension){
@@ -25,16 +25,23 @@ class ComposerScripts
         }
         $psr4File = $filesystem->normalizePath(realpath($config->get('vendor-dir').'/composer/autoload_psr4.php'));
         $yii2extensionFile = $filesystem->normalizePath(realpath($config->get('vendor-dir').'/yiisoft/extensions.php'));
-
-        self::appendBeforeLastline($psr4config,$psr4File);
-        self::appendBeforeLastline($yii2conifg,$yii2extensionFile);
-
+        
+        if($psr4config && $psr4File){
+            echo 'generating local autoload_psr4.php ....\n';
+            self::appendBeforeLastline($psr4config,$psr4File);
+            echo 'local autoload_psr4 generated.\n';
+        }
+        if($yii2conifg && $yii2extensionFile){
+            echo 'generating local yii2 extensions.php....\n';
+            self::appendBeforeLastline($yii2conifg,$yii2extensionFile);
+            echo 'local yii2 extensions.php.\n';
+        }
     }
     /**
      *
-     * 输入一个yii2扩展的配置 生成,一个符合yiisoft/extensions.php格式的配置
-     *
-     * @param array $extension 一个扩展配置,配置应该是一个数字['name'=>'','version'=>'','alias'=>'','path'=>'']
+     * generate an yii2 extension config string  
+     *   *
+     * @param array $extension an extension object ,it should be in the format like  ['name'=>'','version'=>'','alias'=>'','path'=>'']
      */
     public static function genYii2ExtensionConfig($extension)
     {
@@ -50,14 +57,12 @@ class ComposerScripts
     ),";
         $search = array('{name}','{version}','{alias}','{path}');
         $config = str_replace($search,$extension,$template);
-        echo 'config......\n';
-        var_dump($config);
         return $config;
     }
 
     /**
      *
-     * 再配置文件的最后一行之前插入新的配置
+     * append the giving data to the file before the last line  
      */
     public static function appendBeforeLastline($data,$file)
     {
@@ -66,9 +71,6 @@ class ComposerScripts
         $lines = explode("\n",$content);
         array_splice($lines,count($lines)-2,0,$data);
         $content  = implode("\n",$lines);
-        echo 'content.........\n';
-
-        var_dump($content);
 
         file_put_contents($file,$content);
     }

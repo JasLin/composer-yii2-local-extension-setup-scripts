@@ -1,0 +1,31 @@
+{
+  "config" : {
+    "vendor-dir" : "vendor"
+  },
+  "require": {
+      "jaslin/composer-yii2-local-extension-setup-scripts": "dev-master"
+  },
+  "scripts" : {
+      "post-autoload-dump" : "jaslin\\yii2\\composer\\ComposerScripts::postAutoloadDump"
+  },
+  "extra" : {
+      "local-psr-4" : [
+        "    'botwave\\\\rbac\\\\' => array($vendorDir . '/botwave/rbac'),",
+        "    'botwave\\\\user\\\\' => array($vendorDir .'/botwave/user'),"
+      ],
+      "yii2-local-extensions" : [
+        {
+            "name" : "botwave/cms",
+            "version" : "dev-master",
+            "alias" : "@botwave/cms",
+            "path" : "$vendor.'/botwave/cms'"
+        },
+        {
+            "name" : "botwave/message",
+            "version" : "9999999-dev",
+            "alias" : "@botwave/message",
+            "path" : "$vendor.'/botwave/message'"
+        }
+      ] 
+  }
+}
