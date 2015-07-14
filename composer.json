@@ -1,0 +1,25 @@
+{
+    "name": "jaslin/composer-yii2-local-extension-setup-scripts",
+    "description": "setup local yii2 extension with composer scripts",
+    "keywords": ["yii2", "extension", "extension","composer","scripts"],
+    "homepage": "https://github.com/JasLin/composer-yii2-local-extension-setup-scripts",
+    "type": "library",
+    "license": "MIT",
+    "support": {
+        "issues": "https://github.com/jaslin/composer-yii2-local-extension-setup-scripts/rissues?state=open",
+        "source": "https://github.com/jaslin/composer-yii2-local-extension-setup-scripts"
+    },
+    "authors": [
+        {
+            "name": "JasLin",
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+    },
+    "autoload": {
+        "psr-4": {
+            "jaslin\\yii2\\composer\\": ""
+        }
+    }
+}
