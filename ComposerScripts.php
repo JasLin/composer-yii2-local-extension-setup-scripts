@@ -18,24 +18,29 @@ class ComposerScripts
         $config = $composer->getConfig();
         $package = $composer->getPackage();
         $extra = $package->getExtra();
-        $psr4config = $extra['local-psr-4'];
+        $localPsr4Config = $extra['local-psr-4'];
+        $vendorDir  = $config->get('vendor-dir');
+        $oExtensions = self::loadExtensions($vendorDir);
         $yii2LocalExtensions = $extra['local-yii2-extensions'];
         
-        $yii2conifg = '';
+
+        $localYii2Config = '';
         foreach($yii2LocalExtensions as $extension){
-           $yii2conifg .= self::genYii2ExtensionConfig($extension);
+            if(array_key_exists($extension['name'],$oExtensions)){
+                $localYii2Config .= self::genYii2ExtensionConfig($extension);
+            } 
         }
         $psr4File = $filesystem->normalizePath(realpath($config->get('vendor-dir').self::PSR4_FILE));
         $yii2extensionFile = $filesystem->normalizePath(realpath($config->get('vendor-dir').self::YII2_EXTENSION_FILE));
         
-        if($psr4config && $psr4File){
+        if($localPsr4Config && $psr4File){
             $io->write('generating local autoload_psr4.php ....');
-            self::appendBeforeLastline($psr4config,$psr4File);
+            self::appendBeforeLastline($localPsr4Config,$psr4File);
             $io->write('local autoload_psr4 generated.');
         }
-        if($yii2conifg && $yii2extensionFile){
+        if($localYii2Config && $yii2extensionFile){
             $io->write('generating local yii2 extensions.php....');
-            self::appendBeforeLastline($yii2conifg,$yii2extensionFile);
+            self::appendBeforeLastline($localYii2Config,$yii2extensionFile);
             $io->write('local yii2 extensions.php generated.');
         }
     }
@@ -77,7 +82,7 @@ class ComposerScripts
         file_put_contents($file,$content);
     }
 
-    protected static function loadExtensions($vendorDir)
+    public static function loadExtensions($vendorDir)
     {
         $file = $vendorDir . self::YII2_EXTENSION_FILE;
         if (!is_file($file)) {
