@@ -7,8 +7,9 @@ use Composer\Util\Filesystem;
 
 class ComposerScripts 
 {
+    const PSR4_FILE = '/composer/autoload_psr4.php';
+    const YII2_EXTENSION_FILE = '/yiisoft/extensions.php';
 
-    
     public static function postAutoloadDump(Event $event)
     {
         $composer = $event->getComposer();
@@ -24,8 +25,8 @@ class ComposerScripts
         foreach($yii2LocalExtensions as $extension){
            $yii2conifg .= self::genYii2ExtensionConfig($extension);
         }
-        $psr4File = $filesystem->normalizePath(realpath($config->get('vendor-dir').'/composer/autoload_psr4.php'));
-        $yii2extensionFile = $filesystem->normalizePath(realpath($config->get('vendor-dir').'/yiisoft/extensions.php'));
+        $psr4File = $filesystem->normalizePath(realpath($config->get('vendor-dir').self::PSR4_FILE));
+        $yii2extensionFile = $filesystem->normalizePath(realpath($config->get('vendor-dir').self::YII2_EXTENSION_FILE));
         
         if($psr4config && $psr4File){
             $io->write('generating local autoload_psr4.php ....');
@@ -74,5 +75,34 @@ class ComposerScripts
         $content  = implode("\n",$lines);
 
         file_put_contents($file,$content);
+    }
+
+    protected static function loadExtensions($vendorDir)
+    {
+        $file = $vendorDir . self::YII2_EXTENSION_FILE;
+        if (!is_file($file)) {
+            return [];
+        }
+        // invalidate opcache of extensions.php if exists
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($file, true);
+        }
+        $extensions = require($file);
+
+        $vendorDir = str_replace('\\', '/', $vendorDir);
+        $n = strlen($vendorDir);
+
+        foreach ($extensions as &$extension) {
+            if (isset($extension['alias'])) {
+                foreach ($extension['alias'] as $alias => $path) {
+                    $path = str_replace('\\', '/', $path);
+                    if (strpos($path . '/', $vendorDir . '/') === 0) {
+                        $extension['alias'][$alias] = '<vendor-dir>' . substr($path, $n);
+                    }
+                }
+            }
+        }
+
+        return $extensions;
     }
 }
