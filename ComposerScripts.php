@@ -35,7 +35,7 @@ class ComposerScripts
         if($yii2conifg && $yii2extensionFile){
             $io->write('generating local yii2 extensions.php....');
             self::appendBeforeLastline($yii2conifg,$yii2extensionFile);
-            $io->write('local yii2 extensions.php.');
+            $io->write('local yii2 extensions.php generated.');
         }
     }
     /**
