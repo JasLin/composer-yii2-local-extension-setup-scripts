@@ -25,23 +25,26 @@ your composer.json of your yii2 project should look like :
         "    'botwave\\\\rbac\\\\' => array($vendorDir . '/botwave/rbac'),",
         "    'botwave\\\\user\\\\' => array($vendorDir .'/botwave/user'),"
       ],
-      "local-yii2-extensions" : [
-        {
+      "local-yii2-extensions" : {
+        "botwave/cms" :{
             "name" : "botwave/cms",
             "version" : "dev-master",
-            "alias" : "@botwave/cms",
-            "path" : "$vendor.'/botwave/cms'"
+            "alias" : {
+                    "@botwave/cms" :  "<vendor-dir>/botwave/cms",
+                    "@botwave/cms/css" : "<vendor-dir>/botwave/cms/css" 
+             }
         },
+        "botwave/message" :
         {
             "name" : "botwave/message",
-            "version" : "9999999-dev",
-            "alias" : "@botwave/message",
-            "path" : "$vendor.'/botwave/message'"
+            "version" : "888888-dev",
+            "alias" : {
+                    "@botwave/message" : "<vendor-dir>/botwave/message"
+             }
         }
-      ] 
+      }
   }
 }
-
 ```
 
 ### result
