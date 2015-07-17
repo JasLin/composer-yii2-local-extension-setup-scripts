@@ -8,65 +8,33 @@ use Composer\Util\Filesystem;
 class ComposerScripts 
 {
     const PSR4_FILE = '/composer/autoload_psr4.php';
-    const YII2_EXTENSION_FILE = '/yiisoft/extensions.php';
+    const EXTENSION_FILE = '/yiisoft/extensions.php';
 
     public static function postAutoloadDump(Event $event)
     {
-        $composer = $event->getComposer();
-        $io = $event->getIO();
-        $filesystem = new FileSystem();
-        $config = $composer->getConfig();
-        $package = $composer->getPackage();
-        $extra = $package->getExtra();
+        $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
+        $extra = $event->getComposer()->getPackage()->getExtra();
         $localPsr4Config = $extra['local-psr-4'];
-        $vendorDir  = $config->get('vendor-dir');
-        $oExtensions = self::loadExtensions($vendorDir);
-        $yii2LocalExtensions = $extra['local-yii2-extensions'];
-        
+        $localExtensions = $extra['local-yii2-extensions'];
 
-        $localYii2Config = '';
-        foreach($yii2LocalExtensions as $extension){
-            if(array_key_exists($extension['name'],$oExtensions)){
-                $localYii2Config .= self::genYii2ExtensionConfig($extension);
-            } 
-        }
-        $psr4File = $filesystem->normalizePath(realpath($config->get('vendor-dir').self::PSR4_FILE));
-        $yii2extensionFile = $filesystem->normalizePath(realpath($config->get('vendor-dir').self::YII2_EXTENSION_FILE));
+        $extensions = self::loadExtensions($vendorDir);
+        $extensions = array_merge($extensions,$localExtensions); 
+        self::saveExtensions($vendorDir,$extensions);
         
+        self::savePsr4s($vendorDir,$localPsr4Config,$event->getIO());
+    }
+
+    public static function savePsr4s($vendorDir,$localPsr4Config,$io){
+
+        $filesystem = new FileSystem();
+        $psr4File = $filesystem->normalizePath(realpath($vendorDir.self::PSR4_FILE));
+
         if($localPsr4Config && $psr4File){
             $io->write('generating local autoload_psr4.php ....');
             self::appendBeforeLastline($localPsr4Config,$psr4File);
             $io->write('local autoload_psr4 generated.');
         }
-        if($localYii2Config && $yii2extensionFile){
-            $io->write('generating local yii2 extensions.php....');
-            self::appendBeforeLastline($localYii2Config,$yii2extensionFile);
-            $io->write('local yii2 extensions.php generated.');
-        }
     }
-    /**
-     *
-     * generate an yii2 extension config string  
-     *   *
-     * @param array $extension an extension object ,it should be in the format like  ['name'=>'','version'=>'','alias'=>'','path'=>'']
-     */
-    public static function genYii2ExtensionConfig($extension)
-    {
-        $template = "
-    '{name}' => 
-    array(
-        'name' => '{name}',
-        'version' => '{version}',
-        'alias' => 
-            array(
-                '{alias}'=>{path}
-            )
-    ),";
-        $search = array('{name}','{version}','{alias}','{path}');
-        $config = str_replace($search,$extension,$template);
-        return $config;
-    }
-
     /**
      *
      * append the giving data to the file before the last line  
@@ -84,7 +52,7 @@ class ComposerScripts
 
     public static function loadExtensions($vendorDir)
     {
-        $file = $vendorDir . self::YII2_EXTENSION_FILE;
+        $file = $vendorDir . self::EXTENSION_FILE;
         if (!is_file($file)) {
             return [];
         }
@@ -109,5 +77,20 @@ class ComposerScripts
         }
 
         return $extensions;
+    }
+
+    protected static function saveExtensions($vendorDir,array $extensions)
+    {
+        $file = $vendorDir .self::EXTENSION_FILE;
+        if (!file_exists(dirname($file))) {
+            mkdir(dirname($file), 0777, true);
+        }
+        $array = str_replace("'<vendor-dir>", '$vendorDir . \'', var_export($extensions, true));
+        // $array = var_export($extensions, true);
+        file_put_contents($file, "<?php\n\n\$vendorDir = dirname(__DIR__);\n\nreturn $array;\n");
+        // invalidate opcache of extensions.php if exists
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($file, true);
+        }
     }
 }
