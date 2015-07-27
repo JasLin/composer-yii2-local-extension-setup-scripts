@@ -14,8 +14,8 @@ class ComposerScripts
     {
         $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
         $extra = $event->getComposer()->getPackage()->getExtra();
-        $localPsr4Config = $extra['local-psr-4'] ? $extra['local-psr-4'] : null ;
-        $localExtensions = $extra['local-yii2-extensions'] ? $extra['local-yii2-extensions'] : null;
+        $localPsr4Config = array_key_exists('local-psr-4',$extra) ? $extra['local-psr-4'] : null ;
+        $localExtensions = array_key_exists('local-yii2-extensions',$extra) ? $extra['local-yii2-extensions'] : null;
 
         if($localExtensions){
             $extensions = self::loadExtensions($vendorDir);
