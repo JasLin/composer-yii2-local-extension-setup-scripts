@@ -14,14 +14,17 @@ class ComposerScripts
     {
         $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
         $extra = $event->getComposer()->getPackage()->getExtra();
-        $localPsr4Config = $extra['local-psr-4'];
-        $localExtensions = $extra['local-yii2-extensions'];
+        $localPsr4Config = $extra['local-psr-4'] ? $extra['local-psr-4'] : null ;
+        $localExtensions = $extra['local-yii2-extensions'] ? $extra['local-yii2-extensions'] : null;
 
-        $extensions = self::loadExtensions($vendorDir);
-        $extensions = array_merge($extensions,$localExtensions); 
-        self::saveExtensions($vendorDir,$extensions);
-        
-        self::savePsr4s($vendorDir,$localPsr4Config,$event->getIO());
+        if($localExtensions){
+            $extensions = self::loadExtensions($vendorDir);
+            $extensions = array_merge($extensions,$localExtensions); 
+            self::saveExtensions($vendorDir,$extensions);
+        }
+        if($localPsr4Config){
+            self::savePsr4s($vendorDir,$localPsr4Config,$event->getIO());
+        }
     }
 
     public static function savePsr4s($vendorDir,$localPsr4Config,$io){
